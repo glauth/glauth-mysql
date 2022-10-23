@@ -19,3 +19,6 @@ plugin_mysql_darwin_amd64:
 
 plugin_mysql_darwin_arm64:
 	PLUGIN_OS=darwin PLUGIN_ARCH=arm64 make plugin_mysql
+
+release-glauth-mysql:
+	@P=mysql M=pkg/plugins/glauth-mysql make releaseplugin
