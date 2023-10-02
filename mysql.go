@@ -5,8 +5,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/glauth/glauth/v2/pkg/plugins"
 	"github.com/glauth/glauth/v2/pkg/handler"
+	"github.com/glauth/glauth/v2/pkg/plugins"
 )
 
 type MysqlBackend struct {
@@ -50,9 +50,9 @@ CREATE TABLE IF NOT EXISTS users (
 	statement.Exec()
 	statement, _ = db.Prepare("CREATE UNIQUE INDEX idx_user_name on users(name)")
 	statement.Exec()
-	statement, _ = db.Prepare("CREATE TABLE IF NOT EXISTS groups (id INTEGER AUTO_INCREMENT PRIMARY KEY, name VARCHAR(64) NOT NULL, gidnumber INTEGER NOT NULL)")
+	statement, _ = db.Prepare("CREATE TABLE IF NOT EXISTS ldapgroups (id INTEGER AUTO_INCREMENT PRIMARY KEY, name VARCHAR(64) NOT NULL, gidnumber INTEGER NOT NULL)")
 	statement.Exec()
-	statement, _ = db.Prepare("CREATE UNIQUE INDEX idx_group_name on groups(name)")
+	statement, _ = db.Prepare("CREATE UNIQUE INDEX idx_group_name on ldapgroups(name)")
 	statement.Exec()
 	statement, _ = db.Prepare("CREATE TABLE IF NOT EXISTS includegroups (id INTEGER AUTO_INCREMENT PRIMARY KEY, parentgroupid INTEGER NOT NULL, includegroupid INTEGER NOT NULL)")
 	statement.Exec()
@@ -61,9 +61,15 @@ CREATE TABLE IF NOT EXISTS users (
 }
 
 // Migrate schema if necessary
-func (b MysqlBackend) MigrateSchema(db *sql.DB, checker func(*sql.DB, string) bool) {
-	if !checker(db, "sshkeys") {
+func (b MysqlBackend) MigrateSchema(db *sql.DB, checker func(*sql.DB, string, string) bool) {
+	if !checker(db, "users", "sshkeys") {
 		statement, _ := db.Prepare("ALTER TABLE users ADD COLUMN sshkeys TEXT DEFAULT ''")
+		statement.Exec()
+	}
+	if checker(db, "groups", "name") {
+		statement, _ := db.Prepare("DROP TABLE ldapgroups")
+		statement.Exec()
+		statement, _ = db.Prepare("ALTER TABLE groups RENAME ldapgroups")
 		statement.Exec()
 	}
 }
