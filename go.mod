@@ -1,8 +1,8 @@
-module github.com/glauth/glauth-sqlite
+module github.com/glauth/glauth-mysql
 
 go 1.25
 
 require (
-	github.com/glauth/glauth/v2 v2.1.0
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/glauth/glauth/v2 v2.5.2
+	github.com/go-sql-driver/mysql v1.10.1
 )
